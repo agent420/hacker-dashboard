@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hacker Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e14;
+      --bg-card: #0d1117;
+      --bg-elevated: #161b22;
+      --border: #1f2a36;
+      --border-glow: #00ff9d33;
+      --text: #e6edf3;
+      --text-dim: #7d8b99;
+      --accent: #00ff9d;
+      --accent-2: #00d4ff;
+      --accent-3: #39ff14;
+      --warning: #ffaa00;
+      --success: #00ff9d;
+      --danger: #ff3366;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-display: 'Orbitron', sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(ellipse at 20% 0%, #00ff9d0a 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, #00d4ff0a 0%, transparent 50%),
+        linear-gradient(180deg, #0a0e14 0%, #0d1117 100%);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 20, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+      box-shadow: 0 0 20px #00ff9d55;
+    }
+
+    .logo h1 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo span {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .header-links {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .header-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.9rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.78rem;
+      transition: all 0.2s ease;
+    }
+
+    .header-links a:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 12px #00ff9d33;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.15rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tool-card:hover {
+      border-color: #00ff9d66;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px #00ff9d18;
+    }
+
+    .tool-card:hover::before {
+      opacity: 1;
+    }
+
+    .tool-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent), 0 8px 28px #00ff9d22;
+    }
+
+    .tool-icon {
+      font-size: 1.4rem;
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    .tool-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
+      color: var(--text);
+    }
+
+    .tool-desc {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      display: none;
+    }
+
+    .panel.visible {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 1.2rem;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-header h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .panel-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+
+    .panel-close:hover {
+      color: var(--danger);
+    }
+
+    .panel-body {
+      padding: 1.25rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .input-row input {
+      flex: 1;
+      min-width: 200px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.65rem 0.9rem;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-row input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px #00ff9d22;
+    }
+
+    .input-row input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #00ff9d22, #00d4ff22);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 0.65rem 1.2rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background: linear-gradient(135deg, #00ff9d33, #00d4ff33);
+      box-shadow: 0 0 16px #00ff9d44;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text-dim);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--text-dim);
+      color: var(--text);
+      box-shadow: none;
+    }
+
+    .terminal {
+      background: #060a0f;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      min-height: 160px;
+      max-height: 420px;
+      overflow-y: auto;
+      font-size: 0.8rem;
+      line-height: 1.55;
+      position: relative;
+    }
+
+    .terminal::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .terminal::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .terminal::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    .term-line {
+      margin-bottom: 0.25rem;
+      word-break: break-all;
+    }
+
+    .term-prompt { color: var(--accent); }
+    .term-info { color: var(--accent-2); }
+    .term-success { color: var(--success); }
+    .term-error { color: var(--danger); }
+    .term-warn { color: var(--warning); }
+    .term-dim { color: var(--text-dim); }
+    .term-highlight { color: #fff; font-weight: 500; }
+
+    .loader {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .quick-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.25s;
+    }
+
+    .quick-card:hover {
+      border-color: var(--accent-2);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px #00d4ff18;
+    }
+
+    .quick-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--bg-elevated);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .quick-info h4 {
+      font-size: 0.9rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .quick-info p {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--text-dim);
+      font-size: 0.72rem;
+      border-top: 1px solid var(--border);
+      margin-top: 1rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    @media (max-width: 640px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .logo h1 {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⬡</div>
+      <div>
+        <h1>HACKER DASHBOARD</h1>
+        <span>Information Gathering Suite</span>
+      </div>
+    </div>
+    <div class="header-links">
+      <a href="https://thehackernews.com/" target="_blank" rel="noopener">
+        <span class="status-dot"></span>
+        Hacker News
+      </a>
+      <a href="https://www.exploit-db.com/" target="_blank" rel="noopener">
+        <span class="status-dot" style="background:#ff3366;box-shadow:0 0 8px #ff3366"></span>
+        New Exploits
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="section-title">EXTERNAL FEEDS</div>
+    <div class="quick-links">
+      <a class="quick-card" href="https://thehackernews.com/" target="_blank" rel="noopener">
+        <div class="quick-icon">📰</div>
+        <div class="quick-info">
+          <h4>The Hacker News</h4>
+          <p>Latest cybersecurity news & threats</p>
+        </div>
+      </a>
+      <a class="quick-card" href="https://www.exploit-db.com/" target="_blank" rel="noopener">
+        <div class="quick-icon">💣</div>
+        <div class="quick-info">
+          <h4>Exploit Database</h4>
+          <p>Public exploits & vulnerability archive</p>
+        </div>
+      </a>
+      <a class="quick-card" href="https://www.exploit-db.com/google-hacking-database" target="_blank" rel="noopener">
+        <div class="quick-icon">🔍</div>
+        <div class="quick-info">
+          <h4>Google Hacking DB</h4>
+          <p>GHDB – search engine dorks</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="section-title">INFORMATION GATHERING</div>
+    <div class="tools-grid" id="toolsGrid"></div>
+
+    <div class="panel" id="toolPanel">
+      <div class="panel-header">
+        <h3 id="panelTitle">Tool</h3>
+        <button class="panel-close" id="panelClose" title="Close">×</button>
+      </div>
+      <div class="panel-body">
+        <div class="input-row" id="inputRow">
+          <input type="text" id="toolInput" placeholder="Enter target..." autocomplete="off" spellcheck="false" />
+          <button class="btn" id="runBtn">Execute</button>
+        </div>
+        <div class="terminal" id="terminal">
+          <div class="term-line term-dim">// Select a tool and enter a target to begin</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">EXPLOITS</div>
+    <div class="quick-links">
+      <a class="quick-card" href="https://www.exploit-db.com/" target="_blank" rel="noopener">
+        <div class="quick-icon">⚡</div>
+        <div class="quick-info">
+          <h4>Exploit-DB Reference</h4>
+          <p>Search public exploits by CVE, platform, or author</p>
+        </div>
+      </a>
+      <a class="quick-card" href="https://www.exploit-db.com/search" target="_blank" rel="noopener">
+        <div class="quick-icon">🎯</div>
+        <div class="quick-info">
+          <h4>Advanced Search</h4>
+          <p>Filter by type, port, platform, verified status</p>
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    Hacker Dashboard • For educational & authorized security testing only •
+    <a href="https://thehackernews.com/" target="_blank">thehackernews.com</a> •
+    <a href="https://www.exploit-db.com/" target="_blank">exploit-db.com</a>
+  </footer>
+
+  <script>
+    const tools = [
+      { id: 'cf-bypass', name: 'Bypass Cloudflare', icon: '🛡️', desc: 'Resolve real IP behind Cloudflare protection', placeholder: 'example.com',
+        action: async (target, log) => {
+          log('info', `Attempting to discover origin IP for ${target}...`);
+          log('dim', 'Method: Historical DNS / Certificate Transparency / Subdomain enum');
+          log('success', 'Opening recommended tools in new tabs...');
+          window.open(`https://dnsdumpster.com/`, '_blank');
+          window.open(`https://crt.sh/?q=${encodeURIComponent(target)}`, '_blank');
+          window.open(`https://viewdns.info/iphistory/?domain=${encodeURIComponent(target)}`, '_blank');
+          log('info', '→ DNSDumpster, crt.sh (CT logs), ViewDNS IP History opened');
+          log('warn', 'Note: Full automated CF bypass requires backend + multiple data sources.');
+        }
+      },
+      { id: 'cms-detect', name: 'CMS Detect', icon: '🧩', desc: 'Identify CMS / framework of a website', placeholder: 'https://example.com',
+        action: async (target, log) => {
+          if (!target.startsWith('http')) target = 'https://' + target;
+          log('info', `Detecting CMS for ${target}...`);
+          window.open(`https://whatcms.org/?s=${encodeURIComponent(target)}`, '_blank');
+          window.open(`https://builtwith.com/${encodeURIComponent(target.replace(/^https?:\/\//, ''))}`, '_blank');
+          log('success', 'Opened WhatCMS.org and BuiltWith for deep analysis');
+        }
+      },
+      { id: 'traceroute', name: 'Trace Route', icon: '📡', desc: 'Network path tracing (traceroute)', placeholder: 'example.com or 8.8.8.8',
+        action: async (target, log) => {
+          log('info', `Tracing route to ${target}...`);
+          window.open(`https://www.yougetsignal.com/tools/visual-tracert/`, '_blank');
+          window.open(`https://mtr.sh/${encodeURIComponent(target)}`, '_blank');
+          log('success', 'Opened visual traceroute tools');
+        }
+      },
+      { id: 'reverse-ip', name: 'Reverse IP', icon: '🔄', desc: 'Find other domains hosted on same IP', placeholder: 'IP address or domain',
+        action: async (target, log) => {
+          log('info', `Looking up domains sharing IP with ${target}...`);
+          window.open(`https://viewdns.info/reverseip/?host=${encodeURIComponent(target)}&t=1`, '_blank');
+          window.open(`https://domains.yougetsignal.com/`, '_blank');
+          log('success', 'Opened ViewDNS Reverse IP and YouGetSignal');
+        }
+      },
+      { id: 'port-scan', name: 'Port Scan', icon: '🔌', desc: 'Scan common ports on a target host', placeholder: 'IP or domain',
+        action: async (target, log) => {
+          log('info', `Port scan request for ${target}`);
+          log('warn', 'Full port scanning from browser is restricted (CORS / security).');
+          window.open(`https://www.yougetsignal.com/tools/open-ports/`, '_blank');
+          window.open(`https://pentest-tools.com/network-vulnerability-scanning/tcp-port-scanner`, '_blank');
+          log('success', 'Opened online port scanners');
+        }
+      },
+      { id: 'ip-location', name: 'IP Location Finder', icon: '🌍', desc: 'Geolocate an IP address', placeholder: '8.8.8.8 or leave empty for your IP',
+        action: async (target, log) => {
+          const ip = target.trim() || '';
+          log('info', ip ? `Looking up ${ip}...` : 'Looking up your public IP...');
+          try {
+            const url = ip ? `https://ipapi.co/${encodeURIComponent(ip)}/json/` : `https://ipapi.co/json/`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (data.error) throw new Error(data.reason || 'Lookup failed');
+            log('success', '─── GEOLOCATION RESULT ───');
+            log('highlight', `IP          : ${data.ip}`);
+            log('info', `City        : ${data.city || 'N/A'}`);
+            log('info', `Region      : ${data.region || 'N/A'}`);
+            log('info', `Country     : ${data.country_name || 'N/A'} (${data.country_code || ''})`);
+            log('info', `Coordinates : ${data.latitude}, ${data.longitude}`);
+            log('info', `Timezone    : ${data.timezone || 'N/A'}`);
+            log('info', `ISP / Org   : ${data.org || 'N/A'}`);
+            log('info', `ASN         : ${data.asn || 'N/A'}`);
+          } catch (err) {
+            log('error', `Failed: ${err.message}`);
+            window.open(`https://ipinfo.io/${encodeURIComponent(ip)}`, '_blank');
+          }
+        }
+      },
+      { id: 'http-header', name: 'Show HTTP Header', icon: '📋', desc: 'Fetch and display HTTP response headers', placeholder: 'https://example.com',
+        action: async (target, log) => {
+          if (!target.startsWith('http')) target = 'https://' + target;
+          log('info', `Fetching headers for ${target}...`);
+          try {
+            const res = await fetch(target, { method: 'HEAD', mode: 'cors' });
+            log('success', `Status: ${res.status} ${res.statusText}`);
+            log('highlight', '─── RESPONSE HEADERS ───');
+            res.headers.forEach((value, key) => log('info', `${key.padEnd(28)}: ${value}`));
+          } catch (err) {
+            log('warn', `Direct fetch blocked (CORS): ${err.message}`);
+            window.open(`https://securityheaders.com/?q=${encodeURIComponent(target)}&followRedirects=on`, '_blank');
+            log('success', 'Opened external header analyzer');
+          }
+        }
+      },
+      { id: 'shared-dns', name: 'Find Shared DNS', icon: '🔗', desc: 'Discover domains sharing the same nameservers', placeholder: 'example.com',
+        action: async (target, log) => {
+          log('info', `Searching for domains sharing DNS with ${target}...`);
+          window.open(`https://viewdns.info/findns/?domain=${encodeURIComponent(target)}`, '_blank');
+          window.open(`https://dnsdumpster.com/`, '_blank');
+          log('success', 'Opened ViewDNS FindNS and DNSDumpster');
+        }
+      },
+      { id: 'whois', name: 'Whois', icon: '📜', desc: 'Domain / IP registration information', placeholder: 'example.com or IP',
+        action: async (target, log) => {
+          log('info', `Performing WHOIS lookup for ${target}...`);
+          window.open(`https://who.is/whois/${encodeURIComponent(target)}`, '_blank');
+          window.open(`https://www.whois.com/whois/${encodeURIComponent(target)}`, '_blank');
+          log('success', 'Opened who.is and whois.com');
+        }
+      },
+      { id: 'dns-lookup', name: 'DNS Lookup', icon: '🔎', desc: 'Query DNS records (A, AAAA, MX, NS, TXT...)', placeholder: 'example.com',
+        action: async (target, log) => {
+          log('info', `Querying DNS records for ${target}...`);
+          const types = ['A', 'AAAA', 'MX', 'NS', 'TXT', 'CNAME', 'SOA'];
+          try {
+            for (const type of types) {
+              const url = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(target)}&type=${type}`;
+              const res = await fetch(url, { headers: { 'Accept': 'application/dns-json' } });
+              if (!res.ok) continue;
+              const data = await res.json();
+              if (data.Answer && data.Answer.length) {
+                log('highlight', `── ${type} ──`);
+                data.Answer.forEach(ans => log('success', `${ans.name} → ${ans.data}  (TTL ${ans.TTL})`));
+              }
+            }
+            log('dim', 'Source: Cloudflare DNS-over-HTTPS');
+          } catch (err) {
+            log('error', `DNS query failed: ${err.message}`);
+          }
+        }
+      }
+    ];
+
+    const toolsGrid = document.getElementById('toolsGrid');
+    const panel = document.getElementById('toolPanel');
+    const panelTitle = document.getElementById('panelTitle');
+    const panelClose = document.getElementById('panelClose');
+    const toolInput = document.getElementById('toolInput');
+    const runBtn = document.getElementById('runBtn');
+    const terminal = document.getElementById('terminal');
+    let currentTool = null;
+
+    tools.forEach(tool => {
+      const card = document.createElement('div');
+      card.className = 'tool-card';
+      card.dataset.id = tool.id;
+      card.innerHTML = `<span class="tool-icon">${tool.icon}</span><div class="tool-name">${tool.name}</div><div class="tool-desc">${tool.desc}</div>`;
+      card.addEventListener('click', () => selectTool(tool));
+      toolsGrid.appendChild(card);
+    });
+
+    function selectTool(tool) {
+      currentTool = tool;
+      document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
+      document.querySelector(`[data-id="${tool.id}"]`).classList.add('active');
+      panelTitle.innerHTML = `${tool.icon} ${tool.name}`;
+      toolInput.placeholder = tool.placeholder;
+      toolInput.value = '';
+      panel.classList.add('visible');
+      clearTerminal();
+      log('dim', `// ${tool.desc}`);
+      log('dim', `// Ready. Enter target and press Execute.`);
+      toolInput.focus();
+    }
+
+    panelClose.addEventListener('click', () => {
+      panel.classList.remove('visible');
+      document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
+      currentTool = null;
+    });
+
+    function clearTerminal() { terminal.innerHTML = ''; }
+
+    function log(type, msg) {
+      const line = document.createElement('div');
+      line.className = `term-line term-${type}`;
+      const prefix = { info: '› ', success: '✓ ', error: '✗ ', warn: '! ', dim: '  ', highlight: '◆ ' }[type] || '  ';
+      line.textContent = prefix + msg;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    async function runTool() {
+      if (!currentTool) return;
+      const target = toolInput.value.trim();
+      if (!target && currentTool.id !== 'ip-location') {
+        log('error', 'Please enter a target');
+        return;
+      }
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<span class="loader"></span> Running...';
+      clearTerminal();
+      log('info', `Executing ${currentTool.name}...`);
+      log('dim', `Target: ${target || '(auto)'}`);
+      log('dim', '─'.repeat(40));
+      try {
+        await currentTool.action(target, log);
+      } catch (err) {
+        log('error', `Unexpected error: ${err.message}`);
+      }
+      runBtn.disabled = false;
+      runBtn.textContent = 'Execute';
+    }
+
+    runBtn.addEventListener('click', runTool);
+    toolInput.addEventListener('keydown', e => { if (e.key === 'Enter') runTool(); });
+  </script>
+</body>
+</html>
